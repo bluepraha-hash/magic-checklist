@@ -355,55 +355,39 @@
         document.body.appendChild(el);
         setTimeout(() => el.remove(), 1800);
       }
-    }
-
-    function render() {
+function render() {
       const tasks = loadTasks();
       const open = tasks.filter(t => !t.completed);
       const doneToday = tasks.filter(t => t.completed && t.completedAt === today);
       const wrap = $("listWrap");
 
       if (!tasks.length) {
-        wrap.innerHTML = `
-          <div class="empty">
-            <div class="castle">🏰</div>
-            <h2>Your castle is empty</h2>
-            <p>Add a wish below and let’s make today sparkle.</p>
-          </div>`;
+        wrap.innerHTML = '<div class="empty"><div class="castle">🏰</div><h2>Your castle is empty</h2><p>Add a wish below and let’s make today sparkle.</p></div>';
         return;
       }
 
       if (!open.length) {
-        wrap.innerHTML = `
-          <div class="celebrate">
-            <div style="font-size:2.4rem">🎉🌈✨</div>
-            <h2>All the magic is done!</h2>
-            <p>You finished everything for today. Happily ever after… until tomorrow.</p>
-          </div>
-          ${doneToday.length ? `<div class="section-label">Completed today</div>` : ""}
-          ${doneToday.map(taskCard).join("")}
-        `;
+        var html = '<div class="celebrate"><div style="font-size:2.4rem">🎉🌈✨</div><h2>All the magic is done!</h2><p>You finished everything for today.</p></div>';
+        if (doneToday.length) {
+          html += '<div class="section-label">Completed today</div>' + doneToday.map(taskCard).join("");
+        }
+        wrap.innerHTML = html;
         return;
       }
 
-      wrap.innerHTML = `
-        <div class="section-label">Today’s quests</div>
-        ${open.map(taskCard).join("")}
-        \( {doneToday.length ? `<div class="section-label">Completed today</div> \){doneToday.map(taskCard).join("")}` : ""}
-      `;
+      var html2 = '<div class="section-label">Today’s quests</div>' + open.map(taskCard).join("");
+      if (doneToday.length) {
+        html2 += '<div class="section-label">Completed today</div>' + doneToday.map(taskCard).join("");
+      }
+      wrap.innerHTML = html2;
     }
 
     function taskCard(t) {
-      const rolled = !t.completed && t.addedDate && t.addedDate < today;
-      return `
-        <div class="task ${t.completed ? "done" : ""}">
-          <button class="check" data-toggle="\( {t.id}" aria-label="Complete"> \){t.completed ? "★" : ""}</button>
-          <div class="task-body">
-            <div class="task-text"></div>
-            ${rolled ? `<span class="badge">✨ carried over</span>` : ""}
-          </div>
-          <button class="delete" data-delete="${t.id}" aria-label="Delete">✕</button>
-        </div>`;
+      var doneClass = t.completed ? " done" : "";
+      var star = t.completed ? "★" : "";
+      var rolled = !t.completed && t.addedDate && t.addedDate < today;
+      var badge = rolled ? '<span class="badge">✨ carried over</span>' : "";
+      return '<div class="task' + doneClass + '"><button class="check" data-toggle="' + t.id + '" aria-label="Complete">' + star + '</button><div class="task-body"><div class="task-text"></div>' + badge + '</div><button class="delete" data-delete="' + t.id + '" aria-label="Delete">✕</button></div>';
     }
 
     function hydrateText() {
