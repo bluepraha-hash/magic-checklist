@@ -289,3 +289,175 @@
     });
 
     const $ = (id) => document.getElementById(id);
+    $("dateDisplay").textContent = dateNice;
+
+    function loadTasks() {
+      try { return JSON.parse(localStorage.getItem("magicTasks") || "[]"); }
+      catch { return []; }
+    }
+    function saveTasks(tasks) {
+      localStorage.setItem("magicTasks", JSON.stringify(tasks));
+    }
+
+    function handleNewDay() {
+      const last = localStorage.getItem("magicLastDate");
+      if (!last) {
+        localStorage.setItem("magicLastDate", today);
+        return;
+      }
+      if (last !== today) {
+        localStorage.setItem("magicLastDate", today);
+        const open = loadTasks().filter(t => !t.completed).length;
+        $("greeting").textContent = open
+          ? `Good morning! \( {open} unfinished wish \){open === 1 ? "" : "es"} rolled over ✨`
+          : "A brand-new magical day. What shall we do?";
+      }
+    }
+
+    function addTask(text) {
+      const tasks = loadTasks();
+      tasks.unshift({
+        id: Date.now().toString(36) + Math.random().toString(36).slice(2, 7),
+        text,
+        completed: false,
+        completedAt: null,
+        addedDate: today
+      });
+      saveTasks(tasks);
+      render();
+    }
+
+    function toggleTask(id) {
+      const tasks = loadTasks().map(t => {
+        if (t.id !== id) return t;
+        const completed = !t.completed;
+        return { ...t, completed, completedAt: completed ? today : null };
+      });
+      saveTasks(tasks);
+      render();
+      const justDone = tasks.find(t => t.id === id);
+      if (justDone && justDone.completed) burst();
+    }
+
+    function deleteTask(id) {
+      saveTasks(loadTasks().filter(t => t.id !== id));
+      render();
+    }
+
+    function burst() {
+      const bits = ["✨", "🌟", "💛", "💖", "⭐", "🌈"];
+      for (let i = 0; i < 14; i++) {
+        const el = document.createElement("div");
+        el.className = "confetti-piece";
+        el.textContent = bits[i % bits.length];
+        el.style.left = Math.random() * 100 + "vw";
+        el.style.animationDuration = 1.1 + Math.random() * 0.9 + "s";
+        document.body.appendChild(el);
+        setTimeout(() => el.remove(), 1800);
+      }
+    }
+
+    function render() {
+      const tasks = loadTasks();
+      const open = tasks.filter(t => !t.completed);
+      const doneToday = tasks.filter(t => t.completed && t.completedAt === today);
+      const wrap = $("listWrap");
+
+      if (!tasks.length) {
+        wrap.innerHTML = `
+          <div class="empty">
+            <div class="castle">🏰</div>
+            <h2>Your castle is empty</h2>
+            <p>Add a wish below and let’s make today sparkle.</p>
+          </div>`;
+        return;
+      }
+
+      if (!open.length) {
+        wrap.innerHTML = `
+          <div class="celebrate">
+            <div style="font-size:2.4rem">🎉🌈✨</div>
+            <h2>All the magic is done!</h2>
+            <p>You finished everything for today. Happily ever after… until tomorrow.</p>
+          </div>
+          ${doneToday.length ? `<div class="section-label">Completed today</div>` : ""}
+          ${doneToday.map(taskCard).join("")}
+        `;
+        return;
+      }
+
+      wrap.innerHTML = `
+        <div class="section-label">Today’s quests</div>
+        ${open.map(taskCard).join("")}
+        \( {doneToday.length ? `<div class="section-label">Completed today</div> \){doneToday.map(taskCard).join("")}` : ""}
+      `;
+    }
+
+    function taskCard(t) {
+      const rolled = !t.completed && t.addedDate && t.addedDate < today;
+      return `
+        <div class="task ${t.completed ? "done" : ""}">
+          <button class="check" data-toggle="\( {t.id}" aria-label="Complete"> \){t.completed ? "★" : ""}</button>
+          <div class="task-body">
+            <div class="task-text"></div>
+            ${rolled ? `<span class="badge">✨ carried over</span>` : ""}
+          </div>
+          <button class="delete" data-delete="${t.id}" aria-label="Delete">✕</button>
+        </div>`;
+    }
+
+    function hydrateText() {
+      const tasks = loadTasks();
+      const nodes = document.querySelectorAll(".task");
+      const visible = [
+        ...tasks.filter(t => !t.completed),
+        ...tasks.filter(t => t.completed && t.completedAt === today)
+      ];
+      nodes.forEach((node, i) => {
+        const textEl = node.querySelector(".task-text");
+        if (textEl && visible[i]) textEl.textContent = visible[i].text;
+      });
+    }
+
+    const _render = render;
+    render = function() { _render(); hydrateText(); };
+
+    $("listWrap").addEventListener("click", (e) => {
+      const toggle = e.target.closest("[data-toggle]");
+      const del = e.target.closest("[data-delete]");
+      if (toggle) toggleTask(toggle.dataset.toggle);
+      if (del) deleteTask(del.dataset.delete);
+    });
+
+    $("addForm").addEventListener("submit", (e) => {
+      e.preventDefault();
+      const input = $("newTask");
+      const text = input.value.trim();
+      if (!text) return;
+      addTask(text);
+      input.value = "";
+      input.focus();
+    });
+
+    function makeSparkles() {
+      const colors = ["#fff", "#FDE68A", "#F9A8D4", "#C4B5FD"];
+      for (let i = 0; i < 18; i++) {
+        const s = document.createElement("div");
+        s.className = "sparkle";
+        const size = 4 + Math.random() * 7;
+        s.style.width = size + "px";
+        s.style.height = size + "px";
+        s.style.left = Math.random() * 100 + "vw";
+        s.style.top = Math.random() * 100 + "vh";
+        s.style.background = colors[i % colors.length];
+        s.style.animationDelay = Math.random() * 2 + "s";
+        document.body.appendChild(s);
+      }
+    }
+
+    handleNewDay();
+    makeSparkles();
+    render();
+  </script>
+</body>
+</html>
