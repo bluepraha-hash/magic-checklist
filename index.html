@@ -1,41 +1,291 @@
 <!DOCTYPE html>
-
 <html lang="en">
-
 <head>
-
   <meta charset="UTF-8" />
-
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-
   <meta name="apple-mobile-web-app-capable" content="yes" />
-
   <meta name="apple-mobile-web-app-status-bar-style" content="default" />
-
   <meta name="apple-mobile-web-app-title" content="Magic List" />
-
   <meta name="theme-color" content="#5B8DEF" />
-
   <meta name="mobile-web-app-capable" content="yes" />
-
   <title>✨ Magic Checklist</title>
-
   <link rel="preconnect" href="https://fonts.googleapis.com" />
-
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-
   <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Nunito:wght@500;700;800&display=swap" rel="stylesheet" />
-
   <style>
-
     :root {
-
       --sky: #5B8DEF;
-
       --lavender: #A78BFA;
-
       --pink: #F472B6;
-
       --gold: #FBBF24;
-
       --cream: #FFFBEB;
+      --ink: #3B2F63;
+    }
+
+    * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
+    html, body {
+      margin: 0;
+      padding: 0;
+      min-height: 100%;
+      font-family: "Nunito", system-ui, sans-serif;
+      color: var(--ink);
+      background: linear-gradient(165deg, #4C8DFF 0%, #7C6BFF 32%, #E879F9 68%, #FBBF24 100%);
+      background-attachment: fixed;
+    }
+
+    body {
+      padding: 0 0 118px;
+      overflow-x: hidden;
+    }
+
+    .sparkle {
+      position: fixed;
+      pointer-events: none;
+      z-index: 0;
+      border-radius: 50%;
+      animation: twinkle 2.8s ease-in-out infinite;
+    }
+
+    @keyframes twinkle {
+      0%, 100% { opacity: 0.25; transform: scale(0.8); }
+      50% { opacity: 0.95; transform: scale(1.15); }
+    }
+
+    header {
+      position: relative;
+      z-index: 1;
+      text-align: center;
+      padding: 52px 20px 8px;
+    }
+
+    h1 {
+      margin: 0;
+      font-family: "Fredoka", cursive;
+      font-size: clamp(1.9rem, 6vw, 2.5rem);
+      font-weight: 700;
+      color: #fff;
+      letter-spacing: 0.3px;
+      text-shadow: 0 4px 16px rgba(80, 30, 140, 0.35);
+    }
+
+    .date {
+      margin: 8px 0 0;
+      color: #fff8e7;
+      font-weight: 800;
+      font-size: 1.05rem;
+      text-shadow: 0 2px 8px rgba(60, 20, 100, 0.25);
+    }
+
+    .greeting {
+      min-height: 1.4em;
+      margin: 10px 16px 0;
+      color: #fff;
+      font-weight: 700;
+      font-size: 0.98rem;
+      background: rgba(255,255,255,0.18);
+      display: inline-block;
+      padding: 8px 14px;
+      border-radius: 999px;
+      backdrop-filter: blur(8px);
+    }
+
+    .greeting:empty { display: none; }
+
+    main { position: relative; z-index: 1; padding: 12px 0 8px; }
+
+    .section-label {
+      margin: 18px 22px 6px;
+      font-family: "Fredoka", cursive;
+      color: #fff;
+      font-size: 0.95rem;
+      letter-spacing: 0.4px;
+      text-shadow: 0 2px 8px rgba(0,0,0,0.18);
+    }
+    .task {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      margin: 10px 16px;
+      padding: 14px 14px 14px 16px;
+      background: rgba(255, 251, 235, 0.94);
+      border-radius: 20px;
+      box-shadow: 0 10px 24px rgba(70, 20, 120, 0.16);
+      animation: popIn 0.35s cubic-bezier(0.2, 0.9, 0.3, 1.2);
+    }
+
+    .task.done {
+      background: rgba(255,255,255,0.72);
+    }
+
+    .task.done .task-text {
+      text-decoration: line-through;
+      opacity: 0.62;
+    }
+    @keyframes popIn {
+      from { opacity: 0; transform: translateY(10px) scale(0.97); }
+      to { opacity: 1; transform: none; }
+    }
+
+    .check {
+      flex: 0 0 30px;
+      width: 30px;
+      height: 30px;
+      margin-top: 1px;
+      border: 3px solid #7C6BFF;
+      border-radius: 50%;
+      background: #fff;
+      color: transparent;
+      font-size: 16px;
+      font-weight: 800;
+      display: grid;
+      place-items: center;
+      cursor: pointer;
+    }
+    .task.done .check {
+      background: linear-gradient(135deg, #FBBF24, #F59E0B);
+      border-color: #F59E0B;
+      color: #fff;
+      box-shadow: 0 0 0 4px rgba(251, 191, 36, 0.28);
+    }
+
+    .task-body { flex: 1; min-width: 0; }
+
+    .task-text {
+      font-size: 1.08rem;
+      font-weight: 700;
+      line-height: 1.35;
+      word-wrap: break-word;
+    }
+
+    .badge {
+      display: inline-block;
+      margin-top: 6px;
+      padding: 3px 9px;
+      border-radius: 999px;
+      background: linear-gradient(90deg, #F472B6, #A78BFA);
+      color: #fff;
+      font-size: 0.72rem;
+      font-weight: 800;
+    }
+
+    .delete {
+      flex: 0 0 36px;
+      width: 36px;
+      height: 36px;
+      border: 0;
+      background: transparent;
+      color: #c4b5e0;
+      font-size: 1.25rem;
+      border-radius: 50%;
+      cursor: pointer;
+    }
+
+    .empty {
+      text-align: center;
+      padding: 36px 28px;
+      color: #fff;
+    }
+
+    .empty .castle { font-size: 4rem; filter: drop-shadow(0 8px 16px rgba(0,0,0,0.15)); }
+    .empty h2 {
+      font-family: "Fredoka", cursive;
+      margin: 8px 0 6px;
+      font-size: 1.5rem;
+    }
+    .empty p { margin: 0; font-weight: 700; opacity: 0.92; }
+
+    .celebrate {
+      margin: 16px;
+      padding: 22px 18px;
+      text-align: center;
+      background: rgba(255,255,255,0.92);
+      border-radius: 24px;
+      box-shadow: 0 12px 28px rgba(80,20,120,0.18);
+    }
+
+    .celebrate h2 {
+      font-family: "Fredoka", cursive;
+      margin: 0 0 6px;
+      color: #7C3AED;
+    }
+
+    .add-bar {
+      position: fixed;
+      left: 0; right: 0; bottom: 0;
+      z-index: 5;
+      display: flex;
+      gap: 10px;
+      padding: 12px 14px calc(14px + env(safe-area-inset-bottom));
+      background: linear-gradient(180deg, rgba(255,255,255,0.08), rgba(255,255,255,0.22));
+      backdrop-filter: blur(16px);
+    }
+
+    #newTask {
+      flex: 1;
+      height: 56px;
+      border: 0;
+      border-radius: 18px;
+      padding: 0 18px;
+      font: 700 1.02rem "Nunito", sans-serif;
+      background: #FFFBEB;
+      color: var(--ink);
+      box-shadow: 0 8px 20px rgba(60, 10, 90, 0.16);
+      outline: none;
+    }
+
+    #newTask::placeholder { color: #b8a4d8; font-weight: 700; }
+
+    #addBtn {
+      width: 56px;
+      height: 56px;
+      border: 0;
+      border-radius: 18px;
+      font-size: 2rem;
+      line-height: 1;
+      font-weight: 700;
+      color: #fff;
+      background: linear-gradient(135deg, #F472B6, #F59E0B);
+      box-shadow: 0 8px 18px rgba(244, 114, 182, 0.45);
+      cursor: pointer;
+    }
+
+    #addBtn:active, .check:active, .delete:active { transform: scale(0.94); }
+
+    .confetti-piece {
+      position: fixed;
+      top: -10px;
+      z-index: 20;
+      pointer-events: none;
+      font-size: 18px;
+      animation: fall 1.6s ease-in forwards;
+    }
+
+    @keyframes fall {
+      to { transform: translateY(110vh) rotate(360deg); opacity: 0; }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>✨ Magic Checklist</h1>
+    <p class="date" id="dateDisplay"></p>
+    <p class="greeting" id="greeting"></p>
+  </header>
+
+  <main>
+    <div id="listWrap"></div>
+  </main>
+
+  <form class="add-bar" id="addForm">
+    <input id="newTask" maxlength="140" autocomplete="off" placeholder="Add a magical task..." />
+    <button type="submit" id="addBtn" aria-label="Add task">+</button>
+  </form>
+
+  <script>
+    const today = new Date().toLocaleDateString("en-CA");
+    const dateNice = new Date().toLocaleDateString("en-US", {
+      weekday: "long", month: "long", day: "numeric"
+    });
+
+    const $ = (id) => document.getElementById(id);
